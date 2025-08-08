@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Participation</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 500px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .settings {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        input[type="url"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .update-btn {
+            background: #4CAF50;
+            border: none;
+            margin-top: 10px;
+        }
+        .update-btn:hover {
+            background: #45a049;
+        }
+        .stats {
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .redirect-message {
+            display: none;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Study Participation</h1>
+        <p>Click the button below to be randomly assigned to one of two study conditions.</p>
+        
+        <div class="redirect-message" id="redirectMessage">
+            <p>Redirecting you to your assigned form...</p>
+            <div class="spinner" id="spinner"></div>
+        </div>
+        
+        <button class="btn" onclick="randomRedirect()" id="participateBtn">
+            🚀 Participate in Study
+        </button>
+        
+        <div class="settings">
+            <h3>📝 Form Configuration</h3>
+            <div class="form-group">
+                <label for="form1">Form A URL:</label>
+                <input type="url" id="form1" placeholder="https://docs.google.com/forms/d/..." />
+            </div>
+            <div class="form-group">
+                <label for="form2">Form B URL:</label>
+                <input type="url" id="form2" placeholder="https://docs.google.com/forms/d/..." />
+            </div>
+            <button class="btn update-btn" onclick="updateForms()">
+                ✅ Update Forms
+            </button>
+            
+            <div class="stats">
+                <p><strong>Assignment Statistics:</strong></p>
+                <p>Form A: <span id="countA">0</span> assignments</p>
+                <p>Form B: <span id="countB">0</span> assignments</p>
+                <p>Total: <span id="countTotal">0</span> assignments</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Default form URLs - replace these with your actual Google Forms URLs
+        let formA = '';
+        let formB = '';
+        
+        // Statistics tracking (stored in memory only for this session)
+        let stats = {
+            formA: 0,
+            formB: 0,
+            total: 0
+        };
+        
+        function updateStats() {
+            document.getElementById('countA').textContent = stats.formA;
+            document.getElementById('countB').textContent = stats.formB;
+            document.getElementById('countTotal').textContent = stats.total;
+        }
+        
+        function updateForms() {
+            const newFormA = document.getElementById('form1').value.trim();
+            const newFormB = document.getElementById('form2').value.trim();
+            
+            if (!newFormA || !newFormB) {
+                alert('Please enter both form URLs');
+                return;
+            }
+            
+            if (!isValidGoogleFormsUrl(newFormA) || !isValidGoogleFormsUrl(newFormB)) {
+                alert('Please enter valid Google Forms URLs');
+                return;
+            }
+            
+            formA = newFormA;
+            formB = newFormB;
+            
+            alert('Forms updated successfully!');
+        }
+        
+        function isValidGoogleFormsUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                return urlObj.hostname === 'docs.google.com' && 
+                       urlObj.pathname.includes('/forms/');
+            } catch {
+                return false;
+            }
+        }
+        
+        function randomRedirect() {
+            if (!formA || !formB) {
+                alert('Please configure both form URLs first!');
+                return;
+            }
+            
+            // Show redirect message and spinner
+            document.getElementById('redirectMessage').style.display = 'block';
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('participateBtn').style.display = 'none';
+            
+            // Random assignment (50/50 chance)
+            const isFormA = Math.random() < 0.5;
+            const targetUrl = isFormA ? formA : formB;
+            
+            // Update statistics
+            if (isFormA) {
+                stats.formA++;
+            } else {
+                stats.formB++;
+            }
+            stats.total++;
+            updateStats();
+            
+            // Log the assignment (for debugging)
+            console.log(`Assigned to: ${isFormA ? 'Form A' : 'Form B'}`);
+            console.log(`Redirecting to: ${targetUrl}`);
+            
+            // Redirect after a brief delay (1.5 seconds)
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 1500);
+        }
+        
+        // Initialize the display
+        updateStats();
+        
+        // Pre-populate form fields if you want to set default URLs
+        // Uncomment and modify these lines to set your default URLs:
+        // document.getElementById('form1').value = 'https://docs.google.com/forms/d/YOUR_FORM_A_ID/viewform';
+        // document.getElementById('form2').value = 'https://docs.google.com/forms/d/YOUR_FORM_B_ID/viewform';
+    </script>
+</body>
+</html>
