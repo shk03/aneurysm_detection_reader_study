@@ -53,43 +53,11 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        .settings {
+
+        .stats {
             margin-top: 30px;
             padding-top: 30px;
             border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        input[type="url"] {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-        input[type="url"]::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        .update-btn {
-            background: #4CAF50;
-            border: none;
-            margin-top: 10px;
-        }
-        .update-btn:hover {
-            background: #45a049;
-        }
-        .stats {
-            margin-top: 20px;
             font-size: 0.9em;
             opacity: 0.8;
         }
@@ -128,33 +96,25 @@
             🚀 Participate in Study
         </button>
         
-        <div class="settings">
-            <h3>📝 Form Configuration</h3>
-            <div class="form-group">
-                <label for="form1">Form A URL:</label>
-                <input type="url" id="form1" placeholder="https://docs.google.com/forms/d/..." />
-            </div>
-            <div class="form-group">
-                <label for="form2">Form B URL:</label>
-                <input type="url" id="form2" placeholder="https://docs.google.com/forms/d/..." />
-            </div>
-            <button class="btn update-btn" onclick="updateForms()">
-                ✅ Update Forms
-            </button>
-            
-            <div class="stats">
-                <p><strong>Assignment Statistics:</strong></p>
-                <p>Form A: <span id="countA">0</span> assignments</p>
-                <p>Form B: <span id="countB">0</span> assignments</p>
-                <p>Total: <span id="countTotal">0</span> assignments</p>
-            </div>
+        <div class="stats">
+            <h3>📊 Assignment Statistics</h3>
+            <p>Option A: <span id="countA">0</span> assignments</p>
+            <p>Option B: <span id="countB">0</span> assignments</p>
+            <p>Total: <span id="countTotal">0</span> assignments</p>
         </div>
     </div>
 
     <script>
-        // Default form URLs - replace these with your actual Google Forms URLs
-        let formA = '';
-        let formB = '';
+        // ============================================
+        // CONFIGURE YOUR URLS HERE
+        // ============================================
+        // Replace these URLs with your actual study URLs
+        const formA = 'https://google.com';  // Replace with your first URL
+        const formB = 'https://bing.com';  // Replace with your second URL
+        
+        // ============================================
+        // DO NOT MODIFY BELOW THIS LINE
+        // ============================================
         
         // Statistics tracking (stored in memory only for this session)
         let stats = {
@@ -169,39 +129,9 @@
             document.getElementById('countTotal').textContent = stats.total;
         }
         
-        function updateForms() {
-            const newFormA = document.getElementById('form1').value.trim();
-            const newFormB = document.getElementById('form2').value.trim();
-            
-            if (!newFormA || !newFormB) {
-                alert('Please enter both form URLs');
-                return;
-            }
-            
-            if (!isValidGoogleFormsUrl(newFormA) || !isValidGoogleFormsUrl(newFormB)) {
-                alert('Please enter valid Google Forms URLs');
-                return;
-            }
-            
-            formA = newFormA;
-            formB = newFormB;
-            
-            alert('Forms updated successfully!');
-        }
-        
-        function isValidGoogleFormsUrl(url) {
-            try {
-                const urlObj = new URL(url);
-                return urlObj.hostname === 'docs.google.com' && 
-                       urlObj.pathname.includes('/forms/');
-            } catch {
-                return false;
-            }
-        }
-        
         function randomRedirect() {
-            if (!formA || !formB) {
-                alert('Please configure both form URLs first!');
+            if (!formA || !formB || formA === 'https://example.com/survey-a' || formB === 'https://example.com/survey-b') {
+                alert('Please configure the URLs in the HTML code first!');
                 return;
             }
             
@@ -224,7 +154,7 @@
             updateStats();
             
             // Log the assignment (for debugging)
-            console.log(`Assigned to: ${isFormA ? 'Form A' : 'Form B'}`);
+            console.log(`Assigned to: ${isFormA ? 'Option A' : 'Option B'}`);
             console.log(`Redirecting to: ${targetUrl}`);
             
             // Redirect after a brief delay (1.5 seconds)
@@ -235,11 +165,6 @@
         
         // Initialize the display
         updateStats();
-        
-        // Pre-populate form fields if you want to set default URLs
-        // Uncomment and modify these lines to set your default URLs:
-        // document.getElementById('form1').value = 'https://docs.google.com/forms/d/YOUR_FORM_A_ID/viewform';
-        // document.getElementById('form2').value = 'https://docs.google.com/forms/d/YOUR_FORM_B_ID/viewform';
     </script>
 </body>
 </html>
