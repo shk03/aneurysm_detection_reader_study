@@ -567,7 +567,7 @@
 
       <!-- Consent Section -->
       <div class="consent-section">
-        <h3>✍️ Informed Consent and Digital Signature</h3>
+        <h3>Informed Consent and Digital Signature</h3>
 
         <div class="checkbox-group">
           <div class="checkbox-item">
@@ -835,12 +835,7 @@
         }
 
         // Check if URLs are still placeholder values
-        if (
-          !formA ||
-          !formB ||
-          formA === "https://google.com" ||
-          formB === "https://bing.com"
-        ) {
+        if (!formA || !formB || formA === "test" || formB === "test") {
           alert(
             "Study URLs not yet configured. Please contact the research team."
           );
