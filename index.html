@@ -371,49 +371,6 @@
           font-size: 2em;
         }
       }
-
-      /* Progress indicator */
-      .progress-indicator {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 20px 0;
-        gap: 10px;
-      }
-
-      .progress-step {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #e5e7eb;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        color: #6b7280;
-        transition: all 0.3s ease;
-      }
-
-      .progress-step.active {
-        background: #3b82f6;
-        color: white;
-      }
-
-      .progress-step.completed {
-        background: #10b981;
-        color: white;
-      }
-
-      .progress-line {
-        width: 50px;
-        height: 2px;
-        background: #e5e7eb;
-        transition: all 0.3s ease;
-      }
-
-      .progress-line.completed {
-        background: #10b981;
-      }
     </style>
   </head>
   <body>
@@ -527,8 +484,8 @@
               included)
             </li>
           </ul>
-          <h4>Voluntary Participation</h4>
 
+          <h4>Voluntary Participation</h4>
           <ul>
             <li>
               Your participation in this study is entirely voluntary. You may
@@ -628,7 +585,7 @@
       <div class="study-section" id="studySection">
         <h3>Ready to Begin Study</h3>
         <p>
-          Thank you for providing your informed consent. <br />You will now be
+          Thank you for providing your informed consent.<br />You will now be
           randomly assigned to one of two study conditions.
         </p>
 
@@ -651,10 +608,10 @@
       // ============================================
       // CONFIGURE YOUR URLS HERE
       // ============================================
-      const formA = "https://forms.gle/2pZGwvqfAX6Z5C437"; // Replace with your first survey URL
-      const formB = "https://forms.gle/ehSKcTbCPqNNqY2Q7"; // Replace with your second survey URL
+      const formA = "https://forms.gle/2pZGwvqfAX6Z5C437"; // Form A URL
+      const formB = "https://forms.gle/ehSKcTbCPqNNqY2Q7"; // Form B URL
       const googleSheetsUrl =
-        "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec"; // Your Google Apps Script URL
+        "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec";
 
       // ============================================
       // DO NOT MODIFY BELOW THIS LINE
@@ -726,41 +683,6 @@
         if (formComplete) {
           errorMessage.style.display = "none";
         }
-
-        // Update progress
-        updateProgress();
-      }
-
-      // Update progress indicator
-      function updateProgress() {
-        const step1 = document.getElementById("step1");
-        const step2 = document.getElementById("step2");
-        const step3 = document.getElementById("step3");
-        const line1 = document.getElementById("line1");
-        const line2 = document.getElementById("line2");
-
-        // Step 1: Reading information (always completed when page loads)
-        step1.classList.add("completed");
-        step1.classList.remove("active");
-
-        // Step 2: Consent
-        if (consentGiven) {
-          step2.classList.add("completed");
-          step2.classList.remove("active");
-          line1.classList.add("completed");
-
-          // Step 3: Study participation
-          step3.classList.add("active");
-          step3.classList.remove("completed");
-          line2.classList.add("completed");
-        } else {
-          step2.classList.add("active");
-          step2.classList.remove("completed");
-          line1.classList.remove("completed");
-
-          step3.classList.remove("active", "completed");
-          line2.classList.remove("completed");
-        }
       }
 
       // Record consent
@@ -818,9 +740,6 @@
         studySection.classList.add("enabled");
         participateButton.disabled = false;
 
-        // Update progress
-        updateProgress();
-
         // Scroll to study section
         setTimeout(() => {
           studySection.scrollIntoView({ behavior: "smooth" });
@@ -834,11 +753,9 @@
           return;
         }
 
-        // Check if URLs are still placeholder values
-        if (!formA || !formB || formA === "test" || formB === "test") {
-          alert(
-            "Study URLs not yet configured. Please contact the research team."
-          );
+        // Check if URLs are configured
+        if (!formA || !formB) {
+          alert("Study URLs not configured. Please contact the research team.");
           return;
         }
 
@@ -858,10 +775,6 @@
         console.log(`Assigned to: ${isFormA ? "Condition A" : "Condition B"}`);
         console.log(`Redirecting to: ${targetUrl}`);
 
-        // Show final step completion
-        document.getElementById("step3").classList.add("completed");
-        document.getElementById("step3").classList.remove("active");
-
         // Redirect immediately
         window.location.href = targetUrl;
       }
@@ -876,7 +789,6 @@
 
       // Initialize
       checkConsentCompletion();
-      updateProgress();
     </script>
   </body>
 </html>
