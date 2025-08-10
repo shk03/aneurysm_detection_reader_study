@@ -816,18 +816,23 @@
         consentButton.disabled = true;
         consentButton.textContent = "⏳ Recording Consent...";
 
-        // Send to Google Sheets (if configured)
+        // Send to Google Sheets using GET method (CORS-friendly)
         if (
           googleSheetsUrl &&
           googleSheetsUrl !==
-            "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/execYOUR_GOOGLE_APPS_SCRIPT_URL_HERE"
+            "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec"
         ) {
-          fetch(googleSheetsUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(consentData),
+          const params = new URLSearchParams({
+            name: consentData.name,
+            email: consentData.email,
+            timestamp: consentData.timestamp,
+            userAgent: consentData.userAgent,
+          });
+
+          fetch(`${googleSheetsUrl}?${params.toString()}`, {
+            method: "GET",
           })
-            .then((response) => response.json())
+            .then((response) => response.text())
             .then((result) => {
               console.log("Consent recorded:", result);
               completeConsent();
