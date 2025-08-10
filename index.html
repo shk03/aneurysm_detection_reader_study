@@ -210,17 +210,46 @@
 
       .digital-signature {
         margin-top: 15px;
-        padding: 15px;
+        padding: 20px;
         background: #f8fafc;
         border: 2px dashed #d1d5db;
         border-radius: 6px;
-        text-align: center;
+        text-align: left;
         color: #6b7280;
         font-style: italic;
-        min-height: 50px;
+        min-height: 80px;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
+        line-height: 1.8;
+      }
+
+      .digital-signature.completed {
+        background: #f0fdf4;
+        border-color: #10b981;
+        color: #047857;
+        font-style: normal;
+      }
+
+      .digital-signature .signature-name {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 5px;
+      }
+
+      .digital-signature .signature-email {
+        color: #4b5563;
+        margin-bottom: 8px;
+      }
+
+      .digital-signature .signature-date {
+        font-size: 0.9em;
+        color: #6b7280;
+        font-style: italic;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 8px;
+        margin-top: 8px;
       }
 
       /* Study Participation Section */
@@ -738,18 +767,16 @@
         // Update digital signature preview
         if (nameCompleted && emailCompleted) {
           const now = new Date();
+          digitalSignature.className = "digital-signature completed";
           digitalSignature.innerHTML = `
-                    <strong>${nameInput.value.trim()}</strong><br>
-                    ${emailInput.value.trim()}<br>
-                    <em>Signed on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</em>
+                    <div class="signature-name">${nameInput.value.trim()}</div>
+                    <div class="signature-email">${emailInput.value.trim()}</div>
+                    <div class="signature-date">Digitally signed on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</div>
                 `;
-          digitalSignature.style.color = "#374151";
-          digitalSignature.style.fontStyle = "normal";
         } else {
+          digitalSignature.className = "digital-signature";
           digitalSignature.innerHTML =
             "Digital signature will appear here when form is completed";
-          digitalSignature.style.color = "#6b7280";
-          digitalSignature.style.fontStyle = "italic";
         }
 
         // Hide error message if form becomes complete
@@ -865,7 +892,12 @@
         }
 
         // Check if URLs are still placeholder values
-        if (!formA || !formB || formA === "test" || formB === "test") {
+        if (
+          !formA ||
+          !formB ||
+          formA === "https://google.com" ||
+          formB === "https://bing.com"
+        ) {
           alert(
             "Study URLs not yet configured. Please contact the research team."
           );
