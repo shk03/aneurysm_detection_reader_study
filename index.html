@@ -682,7 +682,7 @@
       const formA = "https://google.com"; // Replace with your first survey URL
       const formB = "https://bing.com"; // Replace with your second survey URL
       const googleSheetsUrl =
-        "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec"; // Replace with your Apps Script URL
+        "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec"; // Your Google Apps Script URL
 
       // ============================================
       // DO NOT MODIFY BELOW THIS LINE
@@ -819,7 +819,8 @@
         // Send to Google Sheets (if configured)
         if (
           googleSheetsUrl &&
-          googleSheetsUrl !== "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE"
+          googleSheetsUrl !==
+            "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/execYOUR_GOOGLE_APPS_SCRIPT_URL_HERE"
         ) {
           fetch(googleSheetsUrl, {
             method: "POST",
@@ -870,13 +871,16 @@
           return;
         }
 
+        // Check if URLs are still placeholder values
         if (
           !formA ||
           !formB ||
-          formA === "https://example.com/survey-a" ||
-          formB === "https://example.com/survey-b"
+          formA === "https://google.com" ||
+          formB === "https://bing.com"
         ) {
-          alert("Study URLs not configured. Please contact the research team.");
+          alert(
+            "Study URLs not yet configured. Please contact the research team."
+          );
           return;
         }
 
