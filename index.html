@@ -816,38 +816,26 @@
         consentButton.disabled = true;
         consentButton.textContent = "⏳ Recording Consent...";
 
-        // Send to Google Sheets using GET method (CORS-friendly)
-        if (
-          googleSheetsUrl &&
-          googleSheetsUrl !==
-            "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec"
-        ) {
-          const params = new URLSearchParams({
-            name: consentData.name,
-            email: consentData.email,
-            timestamp: consentData.timestamp,
-            userAgent: consentData.userAgent,
-          });
+        // Send to Google Sheets using GET method
+        const params = new URLSearchParams({
+          name: consentData.name,
+          email: consentData.email,
+          timestamp: consentData.timestamp,
+          userAgent: consentData.userAgent,
+        });
 
-          fetch(`${googleSheetsUrl}?${params.toString()}`, {
-            method: "GET",
+        fetch(`${googleSheetsUrl}?${params.toString()}`, {
+          method: "GET",
+        })
+          .then((response) => response.text())
+          .then((result) => {
+            console.log("Consent recorded:", result);
+            completeConsent();
           })
-            .then((response) => response.text())
-            .then((result) => {
-              console.log("Consent recorded:", result);
-              completeConsent();
-            })
-            .catch((error) => {
-              console.error("Error recording consent:", error);
-              completeConsent(); // Still proceed even if recording fails
-            });
-        } else {
-          console.log(
-            "Google Sheets not configured, consent data:",
-            consentData
-          );
-          completeConsent();
-        }
+          .catch((error) => {
+            console.error("Error recording consent:", error);
+            completeConsent(); // Still proceed even if recording fails
+          });
       }
 
       // Complete consent process
@@ -877,12 +865,7 @@
         }
 
         // Check if URLs are still placeholder values
-        if (
-          !formA ||
-          !formB ||
-          formA === "https://google.com" ||
-          formB === "https://bing.com"
-        ) {
+        if (!formA || !formB || formA === "test" || formB === "test") {
           alert(
             "Study URLs not yet configured. Please contact the research team."
           );
