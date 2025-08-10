@@ -1,147 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Participation</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Study Participation: AI-Assisted Intracranial Aneurysm Detection
+    </title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            color: #1e293b;
-        }
-        .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            max-width: 500px;
-        }
-        h1 {
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            font-weight: 300;
-        }
-        p {
-            font-size: 1.2em;
-            margin-bottom: 30px;
-            opacity: 0.7;
-        }
-        .btn {
-            background: #3b82f6;
-            border: 2px solid #3b82f6;
-            color: white;
-            padding: 15px 30px;
-            font-size: 1.1em;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            margin: 10px;
-        }
-        .btn:hover {
-            background: #2563eb;
-            border-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        color: #1e293b;
+      }
+      .container {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        max-width: 500px;
+      }
+      h1 {
+        margin-bottom: 20px;
+        font-size: 2.5em;
+        font-weight: 300;
+      }
+      p {
+        font-size: 1.2em;
+        margin-bottom: 30px;
+        opacity: 0.7;
+      }
+      .btn {
+        background: #3b82f6;
+        border: 2px solid #3b82f6;
+        color: white;
+        padding: 15px 30px;
+        font-size: 1.1em;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin: 10px;
+      }
+      .btn:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+      }
 
-        .stats {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 1px solid rgba(148, 163, 184, 0.3);
-            font-size: 0.9em;
-            opacity: 0.8;
+      .stats {
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 1px solid rgba(148, 163, 184, 0.3);
+        font-size: 0.9em;
+        opacity: 0.8;
+      }
+      .redirect-message {
+        display: none;
+        font-size: 1.1em;
+        margin-bottom: 20px;
+      }
+      .spinner {
+        border: 3px solid rgba(148, 163, 184, 0.3);
+        border-radius: 50%;
+        border-top: 3px solid #3b82f6;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+        display: none;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        .redirect-message {
-            display: none;
-            font-size: 1.1em;
-            margin-bottom: 20px;
+        100% {
+          transform: rotate(360deg);
         }
-        .spinner {
-            border: 3px solid rgba(148, 163, 184, 0.3);
-            border-radius: 50%;
-            border-top: 3px solid #3b82f6;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-            display: none;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <h1>🎯 Study Participation</h1>
-        <p>Click the button below to be randomly assigned to one of two study conditions.</p>
-        
-        <div class="redirect-message" id="redirectMessage">
-            <p>Redirecting you to your assigned form...</p>
-            <div class="spinner" id="spinner"></div>
-        </div>
-        
-        <button class="btn" onclick="randomRedirect()" id="participateBtn">
-            🚀 Participate in Study
-        </button>
+      <h1>
+        🎯 Study Participation: AI-Assisted Intracranial Aneurysm Detection
+      </h1>
+      <p>
+        Click the button below to be randomly assigned to one of two study
+        conditions.
+      </p>
+
+      <div class="redirect-message" id="redirectMessage">
+        <p>Redirecting you to your assigned form...</p>
+        <div class="spinner" id="spinner"></div>
+      </div>
+
+      <button class="btn" onclick="randomRedirect()" id="participateBtn">
+        🚀 Participate in Study
+      </button>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURE YOUR URLS HERE
-        // ============================================
-        // Replace these URLs with your actual study URLs
-        const formA = 'https://google.com';  // Replace with your first URL
-        const formB = 'https://bing.com';  // Replace with your second URL
-        
-        // ============================================
-        // DO NOT MODIFY BELOW THIS LINE
-        // ============================================
-        
-        // Statistics tracking (stored in memory only for this session)
-        let stats = {
-            formA: 0,
-            formB: 0,
-            total: 0
-        };
-        
-        function randomRedirect() {
-            if (!formA || !formB || formA === 'https://example.com/survey-a' || formB === 'https://example.com/survey-b') {
-                alert('Please configure the URLs in the HTML code first!');
-                return;
-            }
-            
-            // Random assignment (50/50 chance)
-            const isFormA = Math.random() < 0.5;
-            const targetUrl = isFormA ? formA : formB;
-            
-            // Update statistics
-            if (isFormA) {
-                stats.formA++;
-            } else {
-                stats.formB++;
-            }
-            stats.total++;
-            
-            // Log the assignment (for debugging)
-            console.log(`Assigned to: ${isFormA ? 'Option A' : 'Option B'}`);
-            console.log(`Redirecting to: ${targetUrl}`);
-            
-            // Redirect immediately
-            window.location.href = targetUrl;
+      // ============================================
+      // CONFIGURE YOUR URLS HERE
+      // ============================================
+      // Replace these URLs with your actual study URLs
+      const formA = "https://google.com"; // Replace with your first URL
+      const formB = "https://bing.com"; // Replace with your second URL
+
+      // ============================================
+      // DO NOT MODIFY BELOW THIS LINE
+      // ============================================
+
+      // Statistics tracking (stored in memory only for this session)
+      let stats = {
+        formA: 0,
+        formB: 0,
+        total: 0,
+      };
+
+      function randomRedirect() {
+        if (
+          !formA ||
+          !formB ||
+          formA === "https://example.com/survey-a" ||
+          formB === "https://example.com/survey-b"
+        ) {
+          alert("Please configure the URLs in the HTML code first!");
+          return;
         }
+
+        // Random assignment (50/50 chance)
+        const isFormA = Math.random() < 0.5;
+        const targetUrl = isFormA ? formA : formB;
+
+        // Update statistics
+        if (isFormA) {
+          stats.formA++;
+        } else {
+          stats.formB++;
+        }
+        stats.total++;
+
+        // Log the assignment (for debugging)
+        console.log(`Assigned to: ${isFormA ? "Option A" : "Option B"}`);
+        console.log(`Redirecting to: ${targetUrl}`);
+
+        // Redirect immediately
+        window.location.href = targetUrl;
+      }
     </script>
-</body>
+  </body>
 </html>
