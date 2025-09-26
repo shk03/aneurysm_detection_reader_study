@@ -1,8 +1,8 @@
 // ============================================
 // CONFIGURE YOUR URLS HERE
 // ============================================
-const formA = "https://forms.gle/2pZGwvqfAX6Z5C437"; // Form A URL
-const formB = "https://forms.gle/ehSKcTbCPqNNqY2Q7"; // Form B URL
+const formA = "https://forms.gle/B6EFnCeANrZ2DQYr6"; // Form A URL
+const formB = "https://forms.gle/VHzovnZ2SgKt4FQc6"; // Form B URL
 const googleSheetsUrl =
   "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec";
 
