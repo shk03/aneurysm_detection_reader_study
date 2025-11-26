@@ -203,6 +203,32 @@
                 placeholder="Enter your email address"
               />
             </div>
+
+            <div class="input-group">
+              <label>Experience Level *</label>
+              <div class="radio-group" id="experienceLevelGroup">
+                <label class="radio-option">
+                  <input type="radio" name="experienceLevel" value="resident" />
+                  Resident
+                </label>
+                <label class="radio-option">
+                  <input
+                    type="radio"
+                    name="experienceLevel"
+                    value="radiologist"
+                  />
+                  Radiologist
+                </label>
+                <label class="radio-option">
+                  <input
+                    type="radio"
+                    name="experienceLevel"
+                    value="neuroradiologist"
+                  />
+                  Neuroradiologist
+                </label>
+              </div>
+            </div>
           </div>
 
           <div class="digital-signature" id="digitalSignature">
@@ -219,6 +245,7 @@
             class="btn btn-primary"
             id="consentButton"
             onclick="recordConsent()"
+            type="button"
             disabled
           >
             ✅ I Give My Consent
@@ -242,6 +269,7 @@
           class="btn btn-success"
           id="participateBtn"
           onclick="randomRedirect()"
+          type="button"
           disabled
         >
           START

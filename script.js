@@ -14,6 +14,9 @@ const googleSheetsUrl =
 const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 const nameInput = document.getElementById("participantName");
 const emailInput = document.getElementById("participantEmail");
+const experienceInputs = document.querySelectorAll(
+  'input[name="experienceLevel"]'
+);
 const consentButton = document.getElementById("consentButton");
 const participateButton = document.getElementById("participateBtn");
 const errorMessage = document.getElementById("errorMessage");
@@ -21,10 +24,27 @@ const successMessage = document.getElementById("successMessage");
 const digitalSignature = document.getElementById("digitalSignature");
 const studySection = document.getElementById("studySection");
 
-// Statistics tracking
+// Statistics tracking (in-memory cache; authoritative counts come from Google Sheets)
 let stats = { formA: 0, formB: 0, total: 0 };
+let stratifiedStats = {
+  resident: { formA: 0, formB: 0 },
+  radiologist: { formA: 0, formB: 0 },
+  neuroradiologist: { formA: 0, formB: 0 },
+};
 let consentGiven = false;
 let participantData = {}; // Store participant data for randomization
+
+function buildSheetsUrl(params) {
+  const separator = googleSheetsUrl.includes("?") ? "&" : "?";
+  return `${googleSheetsUrl}${separator}${params.toString()}`;
+}
+
+function getSelectedExperienceLevel() {
+  const selected = document.querySelector(
+    'input[name="experienceLevel"]:checked'
+  );
+  return selected ? selected.value : "";
+}
 
 // Toggle collapsible sections
 function toggleSection(header) {
@@ -54,17 +74,20 @@ function checkConsentCompletion() {
   const nameCompleted = nameInput.value.trim().length > 0;
   const emailCompleted =
     emailInput.value.trim().length > 0 && emailInput.validity.valid;
+  const experienceSelected = getSelectedExperienceLevel().length > 0;
 
-  const formComplete = allChecked && nameCompleted && emailCompleted;
+  const formComplete =
+    allChecked && nameCompleted && emailCompleted && experienceSelected;
   consentButton.disabled = !formComplete;
 
   // Update digital signature preview
-  if (nameCompleted && emailCompleted) {
+  if (nameCompleted && emailCompleted && experienceSelected) {
     const now = new Date();
     digitalSignature.className = "digital-signature completed";
     digitalSignature.innerHTML = `
       <div class="signature-name">${nameInput.value.trim()}</div>
       <div class="signature-email">${emailInput.value.trim()}</div>
+      <div class="signature-email">Experience: ${getSelectedExperienceLevel()}</div>
       <div class="signature-date">Digitally signed on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}</div>
     `;
   } else {
@@ -94,6 +117,7 @@ function recordConsent() {
     email: emailInput.value.trim(),
     consentTimestamp: new Date().toISOString(),
     userAgent: navigator.userAgent,
+    experienceLevel: getSelectedExperienceLevel(),
   };
 
   // Show processing state
@@ -107,9 +131,10 @@ function recordConsent() {
     email: participantData.email,
     timestamp: participantData.consentTimestamp,
     userAgent: participantData.userAgent,
+    experienceLevel: participantData.experienceLevel,
   });
 
-  fetch(`${googleSheetsUrl}?${params.toString()}`, {
+  fetch(buildSheetsUrl(params), {
     method: "GET",
   })
     .then((response) => response.text())
@@ -139,8 +164,61 @@ function completeConsent() {
   }, 500);
 }
 
+async function fetchStratumCounts(levelKey) {
+  const params = new URLSearchParams({
+    action: "stats",
+  });
+
+  try {
+    const response = await fetch(buildSheetsUrl(params), {
+      method: "GET",
+    });
+    const text = await response.text();
+    // Try parsing JSON; fall back to cache if unavailable
+    const parsed = JSON.parse(text);
+    if (parsed && parsed.stats && parsed.stats[levelKey]) {
+      return parsed.stats[levelKey];
+    }
+  } catch (error) {
+    console.warn(
+      "Unable to fetch strata counts from Google Sheets, using in-memory cache.",
+      error
+    );
+  }
+
+  return stratifiedStats[levelKey] || { formA: 0, formB: 0 };
+}
+
+async function determineConditionForExperience(experienceLevel) {
+  const levelKey = experienceLevel || "resident";
+  const levelStats = await fetchStratumCounts(levelKey);
+
+  let assignedCondition;
+  if (levelStats.formA === levelStats.formB) {
+    assignedCondition = Math.random() < 0.5 ? "A" : "B";
+  } else {
+    assignedCondition = levelStats.formA < levelStats.formB ? "A" : "B";
+  }
+
+  if (assignedCondition === "A") {
+    levelStats.formA++;
+    stats.formA++;
+  } else {
+    levelStats.formB++;
+    stats.formB++;
+  }
+  stats.total++;
+
+  stratifiedStats[levelKey] = levelStats;
+
+  console.log("Stratified counts (cache):", JSON.stringify(stratifiedStats));
+  console.log("Overall counts (cache):", JSON.stringify(stats));
+
+  return assignedCondition;
+}
+
 // Random redirect to study with tracking
-function randomRedirect() {
+async function randomRedirect() {
   if (!consentGiven) {
     alert("Please complete the consent process first!");
     return;
@@ -156,9 +234,17 @@ function randomRedirect() {
   participateButton.disabled = true;
   participateButton.textContent = "⏳ Assigning Condition...";
 
-  // Random assignment (50/50 chance)
-  const isFormA = Math.random() < 0.5;
-  const assignedCondition = isFormA ? "A" : "B";
+  // Stratified assignment by experience level using latest counts from backend
+  let assignedCondition = "A";
+  try {
+    assignedCondition = await determineConditionForExperience(
+      participantData.experienceLevel
+    );
+  } catch (error) {
+    console.warn("Falling back to default assignment.", error);
+    assignedCondition = Math.random() < 0.5 ? "A" : "B";
+  }
+  const isFormA = assignedCondition === "A";
   const targetUrl = isFormA ? formA : formB;
 
   // Prepare randomization data
@@ -169,16 +255,10 @@ function randomRedirect() {
     randomizationTimestamp: new Date().toISOString(),
   };
 
-  // Update statistics
-  if (isFormA) {
-    stats.formA++;
-  } else {
-    stats.formB++;
-  }
-  stats.total++;
-
   // Log the assignment
-  console.log(`Assigned to: Condition ${assignedCondition}`);
+  console.log(
+    `Assigned to: Condition ${assignedCondition} | Experience: ${participantData.experienceLevel}`
+  );
   console.log(`Redirecting to: ${targetUrl}`);
 
   // Send randomization data to Google Sheets
@@ -191,9 +271,10 @@ function randomRedirect() {
     targetUrl: randomizationData.targetUrl,
     randomizationTimestamp: randomizationData.randomizationTimestamp,
     userAgent: randomizationData.userAgent,
+    experienceLevel: randomizationData.experienceLevel,
   });
 
-  fetch(`${googleSheetsUrl}?${randomizationParams.toString()}`, {
+  fetch(buildSheetsUrl(randomizationParams), {
     method: "GET",
   })
     .then((response) => response.text())
@@ -216,6 +297,9 @@ checkboxes.forEach((checkbox) => {
 
 nameInput.addEventListener("input", checkConsentCompletion);
 emailInput.addEventListener("input", checkConsentCompletion);
+experienceInputs.forEach((input) => {
+  input.addEventListener("change", checkConsentCompletion);
+});
 
 // Initialize
 checkConsentCompletion();
