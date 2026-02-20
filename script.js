@@ -4,7 +4,7 @@
 const formA = "https://forms.gle/B6EFnCeANrZ2DQYr6"; // Form A URL
 const formB = "https://forms.gle/VHzovnZ2SgKt4FQc6"; // Form B URL
 const googleSheetsUrl =
-  "https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec";
+  "https://script.google.com/macros/s/AKfycby6L8B88A2fZ8NwcD4talQdABdLyhRjkTHXt72jkYJiqmh814aedOLmwb5v467Jm3I__w/exec";
 
 // ============================================
 // DO NOT MODIFY BELOW THIS LINE
@@ -15,7 +15,7 @@ const checkboxes = document.querySelectorAll('input[type="checkbox"]');
 const nameInput = document.getElementById("participantName");
 const emailInput = document.getElementById("participantEmail");
 const experienceInputs = document.querySelectorAll(
-  'input[name="experienceLevel"]'
+  'input[name="experienceLevel"]',
 );
 const consentButton = document.getElementById("consentButton");
 const participateButton = document.getElementById("participateBtn");
@@ -41,7 +41,7 @@ function buildSheetsUrl(params) {
 
 function getSelectedExperienceLevel() {
   const selected = document.querySelector(
-    'input[name="experienceLevel"]:checked'
+    'input[name="experienceLevel"]:checked',
   );
   return selected ? selected.value : "";
 }
@@ -69,7 +69,7 @@ function toggleSection(header) {
 // Check if consent form is complete
 function checkConsentCompletion() {
   const allChecked = Array.from(checkboxes).every(
-    (checkbox) => checkbox.checked
+    (checkbox) => checkbox.checked,
   );
   const nameCompleted = nameInput.value.trim().length > 0;
   const emailCompleted =
@@ -182,7 +182,7 @@ async function fetchStratumCounts(levelKey) {
   } catch (error) {
     console.warn(
       "Unable to fetch strata counts from Google Sheets, using in-memory cache.",
-      error
+      error,
     );
   }
 
@@ -238,7 +238,7 @@ async function randomRedirect() {
   let assignedCondition = "A";
   try {
     assignedCondition = await determineConditionForExperience(
-      participantData.experienceLevel
+      participantData.experienceLevel,
     );
   } catch (error) {
     console.warn("Falling back to default assignment.", error);
@@ -257,7 +257,7 @@ async function randomRedirect() {
 
   // Log the assignment
   console.log(
-    `Assigned to: Condition ${assignedCondition} | Experience: ${participantData.experienceLevel}`
+    `Assigned to: Condition ${assignedCondition} | Experience: ${participantData.experienceLevel}`,
   );
   console.log(`Redirecting to: ${targetUrl}`);
 

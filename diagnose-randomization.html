@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Randomization Diagnostics</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 24px;
+      line-height: 1.6;
+    }
+    h1 { text-align: center; margin-bottom: 6px; font-size: 1.5em; color: #f8fafc; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 28px; font-size: 0.9em; }
+
+    .panel {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 720px;
+      margin: 0 auto 20px;
+    }
+    .panel h2 { font-size: 1.05em; margin-bottom: 14px; color: #cbd5e1; }
+
+    .url-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .url-input input {
+      flex: 1;
+      padding: 10px 12px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-family: monospace;
+      font-size: 0.85em;
+    }
+    .url-input input:focus { outline: none; border-color: #3b82f6; }
+
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9em;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-fetch { background: #3b82f6; color: white; }
+    .btn-fetch:hover:not(:disabled) { background: #2563eb; }
+    .btn-sim { background: #8b5cf6; color: white; }
+    .btn-sim:hover:not(:disabled) { background: #7c3aed; }
+    .btn-clear { background: #64748b; color: white; margin-left: auto; }
+
+    .status-bar {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .status-bar.info { display: block; background: #1e3a5f; border: 1px solid #3b82f6; color: #93c5fd; }
+    .status-bar.ok { display: block; background: #14532d; border: 1px solid #10b981; color: #6ee7b7; }
+    .status-bar.err { display: block; background: #450a0a; border: 1px solid #ef4444; color: #fca5a5; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    th, td {
+      padding: 10px 14px;
+      text-align: center;
+      border-bottom: 1px solid #334155;
+      font-size: 0.9em;
+    }
+    th { color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75em; letter-spacing: 0.05em; }
+    .val-a { color: #60a5fa; font-weight: 700; }
+    .val-b { color: #fbbf24; font-weight: 700; }
+    .balanced { color: #34d399; }
+    .imbalanced { color: #f87171; font-weight: 700; }
+
+    .raw-output {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 0.82em;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 200px;
+      overflow-y: auto;
+      color: #cbd5e1;
+    }
+
+    .sim-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #334155; }
+    .sim-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .sim-controls label { font-size: 0.85em; color: #94a3b8; }
+    .sim-controls input, .sim-controls select {
+      padding: 6px 10px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 0.9em;
+      width: 60px;
+    }
+    .sim-controls select { width: auto; }
+
+    .sim-log {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 0.8em;
+      max-height: 250px;
+      overflow-y: auto;
+      line-height: 1.7;
+    }
+    .sim-log .entry-a { color: #60a5fa; }
+    .sim-log .entry-b { color: #fbbf24; }
+    .sim-log .entry-err { color: #f87171; }
+    .sim-log .entry-info { color: #94a3b8; }
+
+    .checklist { margin-top: 14px; }
+    .checklist div {
+      padding: 6px 0;
+      font-size: 0.88em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .check-ok::before { content: "✅"; }
+    .check-warn::before { content: "⚠️"; }
+    .check-fail::before { content: "❌"; }
+  </style>
+</head>
+<body>
+
+  <h1>Randomization Diagnostics</h1>
+  <p class="subtitle">Fetch live stats from your Google Sheets backend and simulate assignments</p>
+
+  <!-- Step 1: Fetch stats -->
+  <div class="panel">
+    <h2>1 — Fetch Current Stats from Backend</h2>
+    <div class="url-input">
+      <input type="text" id="apiUrl"
+        value="https://script.google.com/macros/s/AKfycbzxEQMnnXERy-59MmPeGBz-W8-d1lnuRTB-rfct5-fEbZjPL8H9JB170VNY4KYozGEsCw/exec"
+        placeholder="Your Google Apps Script URL" />
+      <button class="btn-fetch" id="fetchBtn" onclick="fetchStats()">Fetch Stats</button>
+    </div>
+    <div class="status-bar" id="fetchStatus"></div>
+
+    <table id="statsTable" style="display:none;">
+      <thead>
+        <tr><th>Experience Level</th><th>Condition A</th><th>Condition B</th><th>Diff</th><th>Status</th></tr>
+      </thead>
+      <tbody id="statsBody"></tbody>
+    </table>
+
+    <div class="checklist" id="checklist" style="display:none;"></div>
+
+    <details style="margin-top:14px;">
+      <summary style="cursor:pointer; color:#94a3b8; font-size:0.85em;">Raw API response</summary>
+      <div class="raw-output" id="rawOutput">—</div>
+    </details>
+  </div>
+
+  <!-- Step 2: Simulate assignments -->
+  <div class="panel">
+    <h2>2 — Simulate Sequential Assignments</h2>
+    <p style="font-size:0.85em; color:#94a3b8; margin-bottom:14px;">
+      Uses the <em>same algorithm</em> as your consent form's <code>determineConditionForExperience()</code>,
+      starting from the live stats fetched above. Each simulated participant reads the current count and picks the underrepresented condition.
+    </p>
+
+    <div class="sim-controls">
+      <label>Participants:</label>
+      <input type="number" id="simCount" value="10" min="1" max="100" />
+      <label>Level:</label>
+      <select id="simLevel">
+        <option value="mixed">Mixed (random levels)</option>
+        <option value="resident">All Resident</option>
+        <option value="radiologist">All Radiologist</option>
+        <option value="neuroradiologist">All Neuroradiologist</option>
+      </select>
+      <button class="btn-sim" onclick="runSimulation()">Run Simulation</button>
+      <button class="btn-clear" onclick="clearSim()">Clear</button>
+    </div>
+
+    <div class="sim-log" id="simLog">
+      <span class="entry-info">Click "Fetch Stats" first, then run a simulation.</span>
+    </div>
+  </div>
+
+  <!-- Step 3: Troubleshooting hints -->
+  <div class="panel">
+    <h2>3 — Common Issues to Check</h2>
+    <div style="font-size:0.88em; color:#cbd5e1; line-height:1.8;">
+      <p><strong style="color:#f8fafc;">Stats return all zeros:</strong> The spreadsheet header row likely doesn't match. Open your sheet and verify column headers are exactly <code>Experience Level</code> and <code>Study Assignment</code> (check for extra spaces or typos).</p>
+      <br/>
+      <p><strong style="color:#f8fafc;">Some strata are zero but sheet has data:</strong> Cell values may not start with the expected prefix (<code>res</code>, <code>radio</code>, <code>neuro</code>). Check for leading spaces, invisible characters, or different labels. Copy a cell value and paste into a text editor to inspect.</p>
+      <br/>
+      <p><strong style="color:#f8fafc;">Stats are stale / wrong:</strong> After editing your Apps Script, you must create a <strong>new deployment</strong> (Deploy → New Deployment) and update the URL. Saving alone is not enough.</p>
+      <br/>
+      <p><strong style="color:#f8fafc;">Assignment column not recognized:</strong> The <code>normalizeAssignment()</code> function expects values like <code>Condition A</code> or <code>Condition B</code>. If the column contains anything else (e.g., <code>Form A</code>, <code>Group 1</code>), it won't be counted.</p>
+    </div>
+  </div>
+
+<script>
+// Live stats from the backend
+let liveStats = null;
+
+async function fetchStats() {
+  const url = document.getElementById("apiUrl").value.trim();
+  const statusEl = document.getElementById("fetchStatus");
+  const tableEl = document.getElementById("statsTable");
+  const bodyEl = document.getElementById("statsBody");
+  const rawEl = document.getElementById("rawOutput");
+  const checkEl = document.getElementById("checklist");
+
+  if (!url) {
+    statusEl.className = "status-bar err";
+    statusEl.textContent = "Please enter your Google Apps Script URL.";
+    return;
+  }
+
+  statusEl.className = "status-bar info";
+  statusEl.textContent = "Fetching stats…";
+  document.getElementById("fetchBtn").disabled = true;
+
+  try {
+    const separator = url.includes("?") ? "&" : "?";
+    const res = await fetch(`${url}${separator}action=stats`);
+    const text = await res.text();
+    rawEl.textContent = text;
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      statusEl.className = "status-bar err";
+      statusEl.textContent = `Response is not valid JSON. This often means the URL is wrong or the deployment is outdated.`;
+      document.getElementById("fetchBtn").disabled = false;
+      return;
+    }
+
+    if (!parsed.stats) {
+      statusEl.className = "status-bar err";
+      statusEl.textContent = `JSON received but missing "stats" key. Keys found: ${Object.keys(parsed).join(", ")}`;
+      document.getElementById("fetchBtn").disabled = false;
+      return;
+    }
+
+    liveStats = JSON.parse(JSON.stringify(parsed.stats)); // deep copy
+    statusEl.className = "status-bar ok";
+    statusEl.textContent = "Stats fetched successfully.";
+
+    // Render table
+    const levels = ["resident", "radiologist", "neuroradiologist"];
+    let totalA = 0, totalB = 0;
+    let html = "";
+    const checks = [];
+
+    for (const lvl of levels) {
+      const s = parsed.stats[lvl] || { formA: 0, formB: 0 };
+      const diff = Math.abs(s.formA - s.formB);
+      totalA += s.formA;
+      totalB += s.formB;
+      const isZero = s.formA === 0 && s.formB === 0;
+      const isImbalanced = diff > 2;
+
+      html += `<tr>
+        <td style="text-align:left; text-transform:capitalize;">${lvl}</td>
+        <td class="val-a">${s.formA}</td>
+        <td class="val-b">${s.formB}</td>
+        <td class="${isImbalanced ? 'imbalanced' : ''}">${diff}</td>
+        <td class="${isZero ? 'imbalanced' : isImbalanced ? 'imbalanced' : 'balanced'}">
+          ${isZero ? "⚠️ No data" : isImbalanced ? "⚠️ Imbalanced" : "✅ OK"}</td>
+      </tr>`;
+
+      if (isZero) checks.push({ cls: "check-warn", msg: `<strong>${lvl}</strong>: zero counts — are these rows actually in the sheet?` });
+      else if (isImbalanced) checks.push({ cls: "check-warn", msg: `<strong>${lvl}</strong>: difference of ${diff} — check if some rows have unexpected Experience Level values.` });
+      else checks.push({ cls: "check-ok", msg: `<strong>${lvl}</strong>: balanced (A=${s.formA}, B=${s.formB}).` });
+    }
+
+    html += `<tr style="border-top:2px solid #475569;">
+      <td style="text-align:left; font-weight:700;">Total</td>
+      <td class="val-a" style="font-size:1.05em;">${totalA}</td>
+      <td class="val-b" style="font-size:1.05em;">${totalB}</td>
+      <td>${Math.abs(totalA - totalB)}</td>
+      <td></td>
+    </tr>`;
+
+    bodyEl.innerHTML = html;
+    tableEl.style.display = "table";
+
+    // Render checklist
+    if (totalA + totalB === 0) {
+      checks.unshift({ cls: "check-fail", msg: "All counts are zero. Likely cause: column headers in the sheet don't match what the script expects (<code>Experience Level</code>, <code>Study Assignment</code>)." });
+    }
+    checkEl.innerHTML = checks.map(c => `<div class="${c.cls}">${c.msg}</div>`).join("");
+    checkEl.style.display = "block";
+
+  } catch (err) {
+    statusEl.className = "status-bar err";
+    statusEl.textContent = `Network error: ${err.message}. Check the URL and that the deployment allows anonymous access.`;
+    rawEl.textContent = err.toString();
+  }
+
+  document.getElementById("fetchBtn").disabled = false;
+}
+
+function runSimulation() {
+  const logEl = document.getElementById("simLog");
+  const count = parseInt(document.getElementById("simCount").value) || 10;
+  const levelChoice = document.getElementById("simLevel").value;
+  const levels = ["resident", "radiologist", "neuroradiologist"];
+
+  if (!liveStats) {
+    logEl.innerHTML = `<span class="entry-err">⚠️ Fetch stats first before simulating.</span>`;
+    return;
+  }
+
+  // Deep copy live stats as starting point
+  const sim = JSON.parse(JSON.stringify(liveStats));
+  let lines = [`<span class="entry-info">── Starting simulation with ${count} participants ──</span>`];
+  lines.push(`<span class="entry-info">Initial: ${levels.map(l => `${l} A=${sim[l]?.formA||0} B=${sim[l]?.formB||0}`).join(" | ")}</span>`);
+
+  for (let i = 1; i <= count; i++) {
+    const lvl = levelChoice === "mixed" ? levels[Math.floor(Math.random() * levels.length)] : levelChoice;
+
+    if (!sim[lvl]) sim[lvl] = { formA: 0, formB: 0 };
+    const s = sim[lvl];
+
+    let condition;
+    if (s.formA === s.formB) {
+      condition = Math.random() < 0.5 ? "A" : "B";
+    } else {
+      condition = s.formA < s.formB ? "A" : "B";
+    }
+
+    if (condition === "A") s.formA++;
+    else s.formB++;
+
+    const cls = condition === "A" ? "entry-a" : "entry-b";
+    lines.push(`<span class="${cls}">#${i} ${lvl} → Condition ${condition}  (A=${s.formA}, B=${s.formB})</span>`);
+  }
+
+  lines.push(`<span class="entry-info">── Final counts ──</span>`);
+  for (const lvl of levels) {
+    const s = sim[lvl] || { formA: 0, formB: 0 };
+    const diff = Math.abs(s.formA - s.formB);
+    const cls = diff > 1 ? "entry-err" : "entry-info";
+    lines.push(`<span class="${cls}">${lvl}: A=${s.formA} B=${s.formB} (diff=${diff})</span>`);
+  }
+
+  logEl.innerHTML = lines.join("<br/>");
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function clearSim() {
+  document.getElementById("simLog").innerHTML = `<span class="entry-info">Cleared.</span>`;
+}
+</script>
+</body>
+</html>
